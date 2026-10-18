@@ -1,8 +1,7 @@
 import 'package:arescare/data/savings_store.dart';
-import 'package:arescare/data/seed_contributions.dart';
 import 'package:arescare/domain/encouragement.dart';
 import 'package:arescare/domain/money.dart';
-import 'package:arescare/models/contribution.dart';
+import 'package:arescare/models/savings_book.dart';
 import 'package:arescare/state/savings_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -22,43 +21,6 @@ void main() {
     expect(parseSoles(''), isNull);
   });
 
-  test('el ahorro inicial separa consultas, anestesia y cirugía', () {
-    final book = seedBook(now: DateTime(2026, 10, 18));
-    expect(book.saved, 950);
-    expect(book.goal, 1500);
-    expect(book.savedIn(DefaultSections.consultas), 700);
-    expect(book.savedIn(DefaultSections.anestesia), 250);
-    expect(book.savedIn(DefaultSections.cirugia), 0);
-    expect(book.nextSection?.id, DefaultSections.anestesia);
-    expect(book.progressOf(DefaultSections.consultas), 1);
-    expect(book.progressOf(DefaultSections.anestesia), closeTo(0.5, 0.001));
-  });
-
-  test('un aporte viejo sin proceso se reparte llenando cada meta', () {
-    final clock = DateTime(2026, 10, 18);
-    final legacy = [
-      Contribution(
-        id: 'a',
-        sectionId: '',
-        title: 'Inicio',
-        amount: 700,
-        emoji: '🪙',
-        createdAt: clock,
-      ),
-      Contribution(
-        id: 'b',
-        sectionId: '',
-        title: 'Siguiente',
-        amount: 100,
-        emoji: '✨',
-        createdAt: clock.add(const Duration(days: 1)),
-      ),
-    ];
-    final book = migrateLegacyContributions(legacy);
-    expect(book.savedIn(DefaultSections.consultas), 700);
-    expect(book.savedIn(DefaultSections.anestesia), 100);
-  });
-
   test('los mensajes rotan con cada apertura', () {
     expect(Encouragement.forLaunch(0), Encouragement.messages[0]);
     expect(Encouragement.forLaunch(1), Encouragement.messages[1]);
@@ -66,32 +28,49 @@ void main() {
     expect(Encouragement.forLaunch(3), Encouragement.messages[0]);
   });
 
-  test('un aporte entra a un proceso y una sección nueva se guarda', () async {
-    final store = MemorySavingsStore(seedBook(now: DateTime(2026, 10, 18)));
+  test('empieza vacía y guarda un proceso con su aporte', () async {
+    final store = MemorySavingsStore();
     final controller = SavingsController(store);
     await controller.load();
-    expect(controller.balance, 950);
-
-    await controller.add(
-      sectionId: DefaultSections.cirugia,
-      title: 'Extra del día',
-      amount: 15,
-      emoji: '✨',
-    );
-    expect(controller.balance, 965);
-    expect(controller.savedIn(DefaultSections.cirugia), 15);
+    expect(controller.balance, 0);
+    expect(controller.sections, isEmpty);
+    expect(controller.goal, 0);
 
     final created = await controller.addSection(
-      name: 'Medicinas',
-      emoji: '💊',
+      name: 'Fisioterapia',
+      emoji: '🐶',
       goal: 200,
     );
-    expect(controller.goal, 1700);
-    expect(controller.findSection(created.id)?.name, 'Medicinas');
+    expect(controller.goal, 200);
+    expect(controller.findSection(created.id)?.emoji, '🐶');
+
+    await controller.add(
+      sectionId: created.id,
+      title: 'Paseo extra',
+      amount: 15,
+      emoji: '🎾',
+    );
+    expect(controller.balance, 15);
+    expect(controller.savedIn(created.id), 15);
 
     final reloaded = SavingsController(store);
     await reloaded.load();
-    expect(reloaded.balance, 965);
-    expect(reloaded.sections.last.name, 'Medicinas');
+    expect(reloaded.balance, 15);
+    expect(reloaded.sections.single.name, 'Fisioterapia');
+    expect(reloaded.contributions.single.emoji, '🎾');
+  });
+
+  test('se puede quitar el único proceso y volver a cero', () async {
+    final controller = SavingsController(MemorySavingsStore());
+    await controller.load();
+    final created = await controller.addSection(
+      name: 'Consultas',
+      emoji: '🐾',
+      goal: 100,
+    );
+    expect(await controller.removeSection(created.id), isTrue);
+    expect(controller.sections, isEmpty);
+    expect(controller.balance, 0);
+    expect(SavingsBook.empty.saved, 0);
   });
 }

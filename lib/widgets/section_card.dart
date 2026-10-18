@@ -29,11 +29,22 @@ class SectionCard extends StatelessWidget {
     final missing = (section.goal - saved).clamp(0, section.goal).toDouble();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        child: InkWell(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryText.withValues(alpha: 0.06),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          child: InkWell(
           onTap: onOpen,
           borderRadius: BorderRadius.circular(22),
           child: Padding(
@@ -137,6 +148,7 @@ class SectionCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

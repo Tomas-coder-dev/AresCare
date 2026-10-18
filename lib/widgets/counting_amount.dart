@@ -37,14 +37,18 @@ class _CountingAmountState extends State<CountingAmount> {
       duration: const Duration(milliseconds: 900),
       curve: Curves.easeOutCubic,
       builder: (context, value, _) {
-        return Text(
-          formatSoles(value),
-          textAlign: TextAlign.center,
-          style: AppTypography.nunito(
-            fontSize: 42,
-            fontWeight: FontWeight.w800,
-            color: AppColors.primaryText,
-            height: 1.05,
+        return FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            formatSoles(value),
+            softWrap: false,
+            textAlign: TextAlign.center,
+            style: AppTypography.nunito(
+              fontSize: 42,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryText,
+              height: 1.05,
+            ),
           ),
         );
       },

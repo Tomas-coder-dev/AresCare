@@ -113,13 +113,6 @@ class _SectionScreenState extends State<SectionScreen> {
     if (section == null || !mounted) {
       return;
     }
-    if (_savings.sections.length <= 1) {
-      await _dialog(
-        'Déjalo con ella',
-        'Tiene que quedar al menos un proceso para saber a dónde va cada sol.',
-      );
-      return;
-    }
     final saved = _savings.savedIn(section.id);
     final confirmed = await showDialog<bool>(
       context: context,
