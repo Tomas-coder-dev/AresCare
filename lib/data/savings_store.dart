@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/contribution.dart';
 import '../models/savings_book.dart';
-import 'seed_contributions.dart';
 
 abstract class SavingsStore {
   Future<SavingsBook> load();
@@ -16,30 +14,17 @@ class SharedPreferencesSavingsStore implements SavingsStore {
   SharedPreferencesSavingsStore(this._prefs);
 
   final SharedPreferences _prefs;
-  static const storageKey = 'arescare.savings.v2';
-  static const legacyKey = 'arescare.contributions.v1';
+
+  /// v3 starts blank. Earlier keys held sample processes and contributions.
+  static const storageKey = 'arescare.savings.v3';
 
   @override
   Future<SavingsBook> load() async {
     final raw = _prefs.getString(storageKey);
-    if (raw != null) {
-      return SavingsBook.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    if (raw == null) {
+      return SavingsBook.empty;
     }
-
-    final legacy = _prefs.getString(legacyKey);
-    if (legacy != null) {
-      final decoded = jsonDecode(legacy) as List<dynamic>;
-      final items = decoded
-          .map((item) => Contribution.fromJson(item as Map<String, dynamic>))
-          .toList();
-      final book = migrateLegacyContributions(items);
-      await save(book);
-      return book;
-    }
-
-    final seed = seedBook();
-    await save(seed);
-    return seed;
+    return SavingsBook.fromJson(jsonDecode(raw) as Map<String, dynamic>);
   }
 
   @override
@@ -49,7 +34,8 @@ class SharedPreferencesSavingsStore implements SavingsStore {
 }
 
 class MemorySavingsStore implements SavingsStore {
-  MemorySavingsStore([SavingsBook? initial]) : _book = initial ?? seedBook();
+  MemorySavingsStore([SavingsBook? initial])
+    : _book = initial ?? SavingsBook.empty;
 
   SavingsBook _book;
 

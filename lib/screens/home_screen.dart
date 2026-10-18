@@ -263,7 +263,9 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       SizedBox(height: compact ? 8 : 12),
       Text(
-        _message,
+        _savings.sections.isEmpty
+            ? 'Empieza en blanco. El nombre y el emoji los eliges tú.'
+            : _message,
         textAlign: TextAlign.center,
         style: AppTypography.nunito(
           fontSize: 14,
@@ -272,16 +274,21 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 1.3,
         ),
       ),
-      SizedBox(height: compact ? 8 : 12),
-      Soft3DButton(
-        key: const Key('add-contribution'),
-        label: '+ Agregar Aporte ✨',
-        onPressed: _openAddSheet,
-      ),
+      if (_savings.sections.isNotEmpty) ...[
+        SizedBox(height: compact ? 8 : 12),
+        Soft3DButton(
+          key: const Key('add-contribution'),
+          label: '+ Agregar Aporte ✨',
+          onPressed: _openAddSheet,
+        ),
+      ],
     ];
   }
 
   List<Widget> _sectionChildren() {
+    if (_savings.sections.isEmpty) {
+      return [_emptyStart()];
+    }
     final nextId = _savings.nextSection?.id;
     return [
       Text(
@@ -335,8 +342,61 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+  Widget _emptyStart() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(18, 22, 18, 18),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.78),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryText.withValues(alpha: 0.06),
+            blurRadius: 22,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Text('🐾', style: TextStyle(fontSize: 34, height: 1)),
+          const SizedBox(height: 10),
+          Text(
+            'Todavía no hay procesos',
+            textAlign: TextAlign.center,
+            style: AppTypography.nunito(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+              color: AppColors.primaryText,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Crea el primero con las palabras que quieras. Si el emoji no está en la lista, escríbelo.',
+            textAlign: TextAlign.center,
+            style: AppTypography.nunito(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.secondaryText,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Soft3DButton(
+            key: const Key('add-section'),
+            label: 'Crear el primer proceso',
+            onPressed: _openNewSection,
+          ),
+        ],
+      ),
+    );
+  }
+
   List<Widget> _historyChildren() {
     final items = _savings.contributions;
+    if (_savings.sections.isEmpty) {
+      return const [];
+    }
     if (items.isEmpty) {
       return [_historyTitle(), const SizedBox(height: 12), _emptyHistory()];
     }

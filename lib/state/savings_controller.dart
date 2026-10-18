@@ -115,7 +115,7 @@ class SavingsController extends ChangeNotifier {
   }
 
   Future<bool> removeSection(String id) async {
-    if (_book.sections.length <= 1) {
+    if (!_book.sections.any((section) => section.id == id)) {
       return false;
     }
     final sections = _book.sections

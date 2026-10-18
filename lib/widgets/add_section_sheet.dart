@@ -6,6 +6,7 @@ import '../models/savings_section.dart';
 import '../state/savings_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
+import 'emoji_choice.dart';
 import 'soft_3d_button.dart';
 
 class SectionIdea {
@@ -159,31 +160,21 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      for (final emoji in sectionEmojis)
-                        GestureDetector(
-                          onTap: () => setState(() => _emoji = emoji),
-                          child: Container(
-                            width: 42,
-                            height: 42,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: _emoji == emoji
-                                  ? AppColors.accent
-                                  : Colors.white,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              emoji,
-                              style: const TextStyle(fontSize: 20),
-                            ),
-                          ),
-                        ),
-                    ],
+                  Text(
+                    'Emoji',
+                    style: AppTypography.nunito(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  EmojiChoice(
+                    addKey: const Key('section-emoji-add'),
+                    fieldKey: const Key('section-emoji'),
+                    emojis: sectionEmojis,
+                    selected: _emoji,
+                    onSelected: (emoji) => setState(() => _emoji = emoji),
                   ),
                   const SizedBox(height: 14),
                   TextFormField(
@@ -280,9 +271,10 @@ class _AddSectionSheetState extends State<AddSectionSheet> {
     );
   }
 
-  InputDecoration _decoration(String label, {String? prefix}) {
+  InputDecoration _decoration(String label, {String? prefix, String? hint}) {
     return InputDecoration(
       labelText: label,
+      hintText: hint,
       prefixText: prefix,
       filled: true,
       fillColor: Colors.white,

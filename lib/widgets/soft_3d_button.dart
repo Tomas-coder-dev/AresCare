@@ -15,7 +15,7 @@ class Soft3DButton extends StatefulWidget {
 }
 
 class _Soft3DButtonState extends State<Soft3DButton> {
-  static const _depth = 6.0;
+  static const _depth = 4.0;
   bool _pressed = false;
 
   void _setPressed(bool value) {
@@ -43,24 +43,30 @@ class _Soft3DButtonState extends State<Soft3DButton> {
         curve: Curves.easeOut,
         width: double.infinity,
         transform: Matrix4.translationValues(0, _pressed ? _depth : 0, 0),
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        padding: const EdgeInsets.symmetric(vertical: 15),
         alignment: Alignment.center,
         decoration: BoxDecoration(
           color: enabled ? AppColors.accent : AppColors.pending,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
               color: enabled ? AppColors.accentShadow : AppColors.pending,
               offset: Offset(0, _pressed ? 0 : _depth),
               blurRadius: 0,
             ),
+            if (!_pressed)
+              BoxShadow(
+                color: AppColors.primaryText.withValues(alpha: 0.06),
+                offset: const Offset(0, 8),
+                blurRadius: 16,
+              ),
           ],
         ),
         child: Text(
           widget.label,
           style: AppTypography.nunito(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
             color: AppColors.primaryText,
           ),
         ),
