@@ -7,6 +7,7 @@ import '../state/savings_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import 'add_section_sheet.dart';
+import 'emoji_choice.dart';
 import 'soft_3d_button.dart';
 
 class ContributionPreset {
@@ -20,6 +21,17 @@ class ContributionPreset {
   final String title;
   final double amount;
 }
+
+const contributionEmojis = <String>[
+  '💖',
+  '☕',
+  '🪙',
+  '✨',
+  '🐾',
+  '💝',
+  '🌸',
+  '🥣',
+];
 
 const contributionPresets = <ContributionPreset>[
   ContributionPreset(emoji: '☕', title: 'Ahorro del café', amount: 15),
@@ -264,15 +276,33 @@ class _AddContributionSheetState extends State<AddContributionSheet> {
                       fontWeight: FontWeight.w600,
                       color: AppColors.primaryText,
                     ),
-                    decoration: _fieldDecoration(
-                      '¿De dónde salió este esfuerzo?',
-                    ),
+                    decoration: _fieldDecoration('Nombre del aporte'),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Ponle un nombre bonito a este esfuerzo.';
                       }
                       return null;
                     },
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'Emoji',
+                    style: AppTypography.nunito(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.primaryText,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  EmojiChoice(
+                    addKey: const Key('contribution-emoji-add'),
+                    fieldKey: const Key('contribution-emoji'),
+                    emojis: contributionEmojis,
+                    selected: _emoji,
+                    onSelected: (emoji) => setState(() {
+                      _emoji = emoji;
+                      _selectedPreset = null;
+                    }),
                   ),
                   const SizedBox(height: 14),
                   Wrap(
@@ -290,7 +320,7 @@ class _AddContributionSheetState extends State<AddContributionSheet> {
                   const SizedBox(height: 18),
                   Soft3DButton(
                     key: const Key('save-contribution'),
-                    label: _saving ? 'Guardando...' : 'Guardar aporte ✨',
+                    label: _saving ? 'Guardando...' : 'Guardar aporte',
                     onPressed: _saving ? null : _save,
                   ),
                 ],
@@ -302,9 +332,14 @@ class _AddContributionSheetState extends State<AddContributionSheet> {
     );
   }
 
-  InputDecoration _fieldDecoration(String label, {String? prefix}) {
+  InputDecoration _fieldDecoration(
+    String label, {
+    String? prefix,
+    String? hint,
+  }) {
     return InputDecoration(
       labelText: label,
+      hintText: hint,
       prefixText: prefix,
       filled: true,
       fillColor: Colors.white,

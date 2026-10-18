@@ -52,7 +52,9 @@ class BalanceGlassCard extends StatelessWidget {
               CountingAmount(amount: balance),
               const SizedBox(height: 4),
               Text(
-                'Meta: ${formatSoles(goal)}',
+                goal <= 0
+                    ? 'La meta aparece con el primer proceso'
+                    : 'Meta: ${formatSoles(goal)}',
                 style: AppTypography.nunito(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
